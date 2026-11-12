@@ -1,0 +1,21 @@
+# Python / Django
+__pycache__/
+*.pyc
+venv/
+.env
+*.sqlite3
+backend/media/
+backend/staticfiles/
+
+# Node / React (Etapa 4)
+node_modules/
+frontend/dist/
+.env.local
+
+# Lambda (Etapa 6)
+lambda/*.zip
+
+# Sistema
+.DS_Store
+Thumbs.db
+.vscode/

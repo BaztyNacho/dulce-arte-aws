@@ -1,0 +1,25 @@
+# Servicio de Gunicorn para el BACKEND de Dulce Arte.
+# Gunicorn ejecuta Django y se reinicia solo si el servidor se reinicia.
+# Se instala en: /etc/systemd/system/gunicorn.service  (lo hace instalar_backend.sh)
+
+[Unit]
+Description=Gunicorn - Dulce Arte backend (API Django)
+After=network.target
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/dulce-arte-aws/backend
+ExecStart=/home/ubuntu/dulce-arte-aws/backend/venv/bin/gunicorn \
+          --workers 3 \
+          --timeout 60 \
+          --bind unix:/run/gunicorn/dulce_arte.sock \
+          --access-logfile - \
+          config.wsgi:application
+RuntimeDirectory=gunicorn
+# Permite que Nginx (grupo www-data) se conecte al socket de Gunicorn.
+UMask=0007
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
