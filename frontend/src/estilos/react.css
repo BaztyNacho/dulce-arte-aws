@@ -1,0 +1,3 @@
+/* Pequeños agregados para la versión en React (el resto del diseño está en dulce.css). */
+.cargando { text-align: center; color: var(--chocolate-suave); padding: 3rem 1rem; }
+button.chip { font: inherit; cursor: pointer; }

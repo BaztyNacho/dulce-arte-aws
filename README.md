@@ -16,7 +16,7 @@ El proyecto de la EVA3 (un solo servidor con Django) se separa en servicios de A
 | Carpeta | Qué contiene | Dónde corre |
 |---|---|---|
 | `backend/` | Django + Django REST Framework (solo API JSON y Django Admin) | EC2 `dulce-arte-backend` |
-| `frontend/` | React (Vite): todas las pantallas por rol (Etapa 4) | EC2 `dulce-arte-frontend` |
+| `frontend/` | React (Vite): todas las pantallas por rol | EC2 `dulce-arte-frontend` |
 | `lambda/` | Función de respaldos y notificaciones (Etapa 6) | AWS Lambda (sin servidor) |
 
 ## Etapas
@@ -24,7 +24,7 @@ El proyecto de la EVA3 (un solo servidor con Django) se separa en servicios de A
 1. **RDS** PostgreSQL privada (`dulce-arte-db`), datos migrados con `pg_dump`/`pg_restore`. ✅
 2. **S3** bucket con `media/` y `static/` públicos de lectura y `respaldos/` privado. ✅
 3. **EC2 backend**: Django como API pura con login JWT. ✅
-4. **EC2 frontend**: React con las mismas pantallas y diseño.
+4. **EC2 frontend**: React con las mismas pantallas y diseño, servido por Nginx.
 5. **API Gateway**: une todo bajo una sola dirección HTTPS.
 6. **Lambda + SNS + EventBridge**: respaldos automáticos y avisos por correo.
 
@@ -44,18 +44,20 @@ Pantallas (una petición por pantalla de React):
 
 | Ruta en React | Endpoint | Roles |
 |---|---|---|
+| `/ingresar` | `POST /api/auth/token/` | todos |
 | `/` Inicio | `GET /api/pantallas/inicio/` | todos (cada rol recibe su inicio) |
 | `/pedidos` | `GET /api/pantallas/pedidos/?estado=&q=&pagina=` | Ventas, Cocina, Admin |
-| `/pedidos/:id` | `GET /api/pedidos/:id/` | Ventas, Cocina, Admin |
+| `/pedidos/:id` | `GET /api/pedidos/:id/` (+ `disponibilidad/`, `confirmar/`, `imagen-referencia/`) | Ventas, Cocina, Admin |
 | `/catalogo` | `GET /api/pantallas/catalogo/?categoria=` | Ventas |
-| `/cotizacion/nueva` | `GET /api/pantallas/cotizador/` + `POST /api/pedidos/` | Ventas |
-| `/cocina` (Kanban) | `GET /api/pedidos/kanban/` + `POST /api/pedidos/:id/avanzar/` | Cocina (Admin mira) |
+| `/pedidos/nuevo` | `GET /api/pantallas/cotizador/` + `POST /api/clientes/` + `POST /api/pedidos/` | Ventas |
+| `/cocina` (Kanban) | `GET /api/pedidos/kanban/` + `POST /api/pedidos/:id/avanzar/` y `rechazar-calidad/` | Cocina (Admin mira) |
 | `/cocina/manana` | `GET /api/pantallas/produccion-manana/` | Cocina, Admin |
 | `/bodega` | `GET /api/pantallas/bodega/?stock=bajo` + `POST /api/movimientos-insumo/` | Bodega (Admin mira) |
 | `/bodega/movimientos` | `GET /api/pantallas/movimientos/?tipo=&periodo=&pagina=` | Bodega, Admin |
-| `/despachos` (Mi ruta) | `GET /api/pantallas/despachos/?dia=` + `/api/rutas/`, `/api/despachos/` | Repartidor |
-| `/despachos/:id/entrega` | `GET /api/pantallas/despachos/:id/` + `POST /api/despachos/:id/confirmar-entrega/` | Repartidor |
-| `/entregados` | `GET /api/pantallas/entregados/?periodo=` | Repartidor, Admin |
+| `/despachos` (Mi ruta) | `GET /api/pantallas/despachos/?dia=` + `/api/rutas/` y `/api/despachos/` | Repartidor |
+| `/despachos/:id/entregar` | `GET /api/pantallas/despachos/:id/` + `POST /api/despachos/:id/confirmar-entrega/` | Repartidor |
+| `/despachos/entregados` | `GET /api/pantallas/entregados/?periodo=` | Repartidor, Admin |
+| Botón "Administración" | `POST /api/auth/admin/` y luego `/admin/` (Django Admin) | Admin |
 
 La documentación completa (Swagger) está en `/api/docs/`.
 

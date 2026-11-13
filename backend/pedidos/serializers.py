@@ -102,6 +102,9 @@ class HistorialEstadoSerializer(serializers.ModelSerializer):
 
 class PedidoSerializer(serializers.ModelSerializer):
     cliente_nombre = serializers.CharField(source='cliente.nombre', read_only=True)
+    # Teléfono y correo del cliente: los muestra el detalle del pedido en React
+    cliente_telefono = serializers.CharField(source='cliente.telefono', read_only=True)
+    cliente_email = serializers.CharField(source='cliente.email', read_only=True)
     estado_display = serializers.CharField(source='get_estado_display', read_only=True)
     tipo_entrega_display = serializers.CharField(source='get_tipo_entrega_display', read_only=True)
     creado_por_nombre = serializers.CharField(source='creado_por.username', read_only=True, default=None)
@@ -114,6 +117,8 @@ class PedidoSerializer(serializers.ModelSerializer):
             'id',
             'cliente',
             'cliente_nombre',
+            'cliente_telefono',
+            'cliente_email',
             'estado',
             'estado_display',
             'tipo_entrega',

@@ -129,6 +129,7 @@ def despacho_resumen(request, despacho, con_productos=False):
     datos = {
         'id': despacho.pk,
         'pedido': pedido.pk,
+        'pedido_estado': pedido.estado,
         'cliente_nombre': pedido.cliente.nombre,
         'cliente_telefono': pedido.cliente.telefono,
         'direccion_entrega': pedido.direccion_entrega,
