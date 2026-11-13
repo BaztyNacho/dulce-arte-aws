@@ -4,6 +4,7 @@ Todas quedan bajo /api/ (ver config/urls.py).
 
   /api/auth/...        inicio de sesión con JWT y acceso al Admin (app cuentas)
   /api/pantallas/...   datos listos para cada pantalla de React (app pantallas)
+  /api/respaldos/      respaldo de la base de datos a S3 (lo pide la Lambda)
   /api/<recurso>/      CRUD y acciones de negocio (pedidos, insumos, rutas...)
 """
 
@@ -19,6 +20,7 @@ from inventario.api import (
     ProductoViewSet,
 )
 from pedidos.api import ClienteViewSet, PedidoViewSet
+from tareas.views import respaldo
 
 router = DefaultRouter()
 
@@ -40,5 +42,6 @@ urlpatterns = [
     path('salud/', salud, name='salud'),
     path('auth/', include('cuentas.urls')),
     path('pantallas/', include('pantallas.urls')),
+    path('respaldos/', respaldo, name='respaldo'),   # lo llama la Lambda (Etapa 6)
     *router.urls,
 ]

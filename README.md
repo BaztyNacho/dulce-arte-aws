@@ -17,15 +17,15 @@ El proyecto de la EVA3 (un solo servidor con Django) se separa en servicios de A
 |---|---|---|
 | `backend/` | Django + Django REST Framework (solo API JSON y Django Admin) | EC2 `dulce-arte-backend` |
 | `frontend/` | React (Vite): todas las pantallas por rol | EC2 `dulce-arte-frontend` |
-| `lambda/` | Función de respaldos y notificaciones (Etapa 6) | AWS Lambda (sin servidor) |
+| `lambda/` | Función `dulce-arte-tareas`: respaldo diario y avisos por correo (SNS) | AWS Lambda (sin servidor) |
 
 ## Etapas
 
 1. **RDS** PostgreSQL privada (`dulce-arte-db`), datos migrados con `pg_dump`/`pg_restore`. ✅
 2. **S3** bucket con `media/` y `static/` públicos de lectura y `respaldos/` privado. ✅
 3. **EC2 backend**: Django como API pura con login JWT. ✅
-4. **EC2 frontend**: React con las mismas pantallas y diseño, servido por Nginx.
-5. **API Gateway**: une todo bajo una sola dirección HTTPS.
+4. **EC2 frontend**: React con las mismas pantallas y diseño, servido por Nginx. ✅
+5. **API Gateway**: une todo bajo una sola dirección HTTPS, con cabecera secreta hacia las EC2. ✅
 6. **Lambda + SNS + EventBridge**: respaldos automáticos y avisos por correo.
 
 ## Endpoints del backend ↔ pantallas del frontend
@@ -39,6 +39,7 @@ Autenticación (JWT):
 | GET | `/api/auth/yo/` | Usuario conectado |
 | POST | `/api/auth/admin/` | Vuelve a pedir la contraseña y abre el Django Admin (sesión de 10 min) |
 | GET | `/api/salud/` | Backend vivo y conectado a RDS |
+| POST | `/api/respaldos/` | Respaldo de la base de datos a S3 (lo pide la Lambda con la cabecera `X-Token-Respaldo`) |
 
 Pantallas (una petición por pantalla de React):
 

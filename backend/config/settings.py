@@ -79,6 +79,7 @@ INSTALLED_APPS = [
     'despachos',
     'cuentas',                       # login JWT, acceso al Admin, salud
     'pantallas',                     # datos listos para cada pantalla de React
+    'tareas',                        # respaldos y avisos (con la Lambda y SNS)
 ]
 
 MIDDLEWARE = [
@@ -263,6 +264,18 @@ SPECTACULAR_SETTINGS = {
 # ---------------------------------------------------------------
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
+
+
+# ---------------------------------------------------------------
+# Respaldos y avisos (Etapa 6: Lambda + SNS)
+# ---------------------------------------------------------------
+# Token que la Lambda envía en la cabecera X-Token-Respaldo para pedir un respaldo
+RESPALDO_TOKEN = env('RESPALDO_TOKEN', default='')
+# Cuántos respaldos automáticos se guardan en S3 (los más antiguos se borran)
+RESPALDOS_A_CONSERVAR = env.int('RESPALDOS_A_CONSERVAR', default=14)
+# Nombre de la función Lambda que publica los avisos en SNS. Vacío = sin avisos.
+LAMBDA_AVISOS = env('LAMBDA_AVISOS', default='')
+AWS_REGION_AVISOS = env('AWS_REGION_AVISOS', default='us-east-1')
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
