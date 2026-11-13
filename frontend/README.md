@@ -18,7 +18,7 @@ src/
   pantallas/          una pantalla por archivo (Inicio, Pedidos, Kanban, Bodega...)
   estilos/dulce.css   diseño de Dulce Arte
   img/ sprites/       logo, fondos y dibujos SVG
-deploy/               Nginx e instalación en la EC2
+deploy/               Nginx (configurar_nginx.sh), instalación y actualización en la EC2
 ```
 
 ## Desarrollo en tu computador

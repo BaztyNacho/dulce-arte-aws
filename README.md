@@ -61,6 +61,20 @@ Pantallas (una petición por pantalla de React):
 
 La documentación completa (Swagger) está en `/api/docs/`.
 
+## API Gateway (HTTP API `dulce-arte-api`)
+
+| Ruta | Integración | Mapeo de parámetros |
+|---|---|---|
+| `ANY /api/{proxy+}` | HTTP → `http://<IP backend>` | `overwrite:path = $request.path`, `append:header.X-Origen-Gateway = <secreto>` |
+| `ANY /admin` y `ANY /admin/{proxy+}` | HTTP → `http://<IP backend>` | igual que la anterior |
+| `GET /media/{proxy+}` y `GET /static/{proxy+}` | HTTP → `https://<bucket>.s3.amazonaws.com` | `overwrite:path = $request.path` |
+| `$default` (todo lo demás) | HTTP → `http://<IP frontend>` | `overwrite:path = $request.path`, `append:header.X-Origen-Gateway = <secreto>` |
+
+- La API Gateway entrega HTTPS; las EC2 reciben HTTP en el puerto 80.
+- La cabecera secreta `X-Origen-Gateway` hace que el backend (Django) y el frontend (Nginx) rechacen con 403
+  a quien intente entrar directo a sus IP. El secreto vive solo en la API Gateway y en los servidores, nunca en GitHub.
+- `overwrite:path` envía la ruta original completa (con su barra final) a cada servidor.
+
 ## Pruebas
 
 ```bash

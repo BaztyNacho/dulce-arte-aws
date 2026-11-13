@@ -1,14 +1,9 @@
 #!/usr/bin/env bash
 # ---------------------------------------------------------------
 # Instala el FRONTEND de Dulce Arte (React) en una EC2 nueva (Ubuntu).
-# Uso:  bash ~/dulce-arte-aws/frontend/deploy/instalar_frontend.sh IP_ELASTICA_DEL_BACKEND
+# Uso:  bash ~/dulce-arte-aws/frontend/deploy/instalar_frontend.sh
 # ---------------------------------------------------------------
 set -e
-IP_BACKEND="$1"
-if [ -z "$IP_BACKEND" ]; then
-  echo "Falta la IP del backend. Uso: bash deploy/instalar_frontend.sh 100.48.119.75"
-  exit 1
-fi
 cd /home/ubuntu/dulce-arte-aws/frontend
 
 echo "1/5 Instalando Node.js, npm y Nginx..."
@@ -32,11 +27,7 @@ echo "4/5 Dando permiso a Nginx para leer la carpeta..."
 chmod o+x /home/ubuntu /home/ubuntu/dulce-arte-aws /home/ubuntu/dulce-arte-aws/frontend
 
 echo "5/5 Configurando Nginx..."
-sed "s/IP_BACKEND/${IP_BACKEND}/g" deploy/nginx_frontend.conf | sudo tee /etc/nginx/sites-available/dulce_frontend > /dev/null
-sudo ln -sf /etc/nginx/sites-available/dulce_frontend /etc/nginx/sites-enabled/dulce_frontend
-sudo rm -f /etc/nginx/sites-enabled/default
-sudo nginx -t
-sudo systemctl restart nginx
+bash deploy/configurar_nginx.sh
 
 echo ""
-echo "Listo. Abre en el navegador:  http://<IP elástica del frontend>/"
+echo "Listo. Abre en el navegador la dirección de la API Gateway (o la IP del frontend si aún no la creas)."
