@@ -9,28 +9,16 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
-from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from pedidos.permisos import EsAdministrador
 
+from .limites import LimiteAccesoAdmin, LimiteAnonimo, LimiteLogin
 from .serializers import PasswordSerializer, TokenConRolSerializer, datos_usuario
 
 MAX_INTENTOS_ADMIN = 5
-
-
-class LimiteLogin(AnonRateThrottle):
-    """Máximo 10 intentos de inicio de sesión por minuto desde una misma IP (contra fuerza bruta)."""
-
-    scope = 'login'
-
-
-class LimiteAccesoAdmin(UserRateThrottle):
-    """Máximo 5 intentos por minuto de la contraseña antes del Admin."""
-
-    scope = 'admin_acceso'
 
 
 class IniciarSesionView(TokenObtainPairView):
@@ -102,5 +90,5 @@ def salud(request):
     return Response({
         'estado': 'ok',
         'base_datos': base_datos,
-        'tu_ip': AnonRateThrottle().get_ident(request),
+        'tu_ip': LimiteAnonimo().get_ident(request),
     })

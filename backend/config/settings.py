@@ -236,8 +236,8 @@ REST_FRAMEWORK = {
     # Quien se pasa recibe 429 "Too Many Requests". Los contadores se guardan en la caché
     # de la base de datos, compartida por todos los procesos de Gunicorn.
     'DEFAULT_THROTTLE_CLASSES': [
-        'rest_framework.throttling.AnonRateThrottle',   # sin sesión: por IP
-        'rest_framework.throttling.UserRateThrottle',   # con sesión: por usuario
+        'cuentas.limites.LimiteAnonimo',   # sin sesión: por IP real del cliente
+        'cuentas.limites.LimiteUsuario',   # con sesión: por usuario
     ],
     'DEFAULT_THROTTLE_RATES': {
         'anon': env('LIMITE_ANONIMO', default='60/min'),
@@ -245,9 +245,7 @@ REST_FRAMEWORK = {
         'login': env('LIMITE_LOGIN', default='10/min'),            # intentos de inicio de sesión por IP
         'admin_acceso': env('LIMITE_ACCESO_ADMIN', default='5/min'),  # contraseña antes del Admin
     },
-    # Cuántos intermediarios agregan su IP a X-Forwarded-For antes de Django
-    # (API Gateway + Nginx = 2). Así se usa la IP real del cliente y no la del intermediario.
-    'NUM_PROXIES': env.int('NUM_PROXIES', default=2),
+    # La IP real del cliente llega en la cabecera X-Ip-Cliente (ver cuentas/limites.py)
 }
 
 SIMPLE_JWT = {

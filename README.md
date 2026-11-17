@@ -66,7 +66,7 @@ La documentación completa (Swagger) está en `/api/docs/`.
 
 | Ruta | Integración | Mapeo de parámetros |
 |---|---|---|
-| `ANY /api/{proxy+}` | HTTP → `http://<IP backend>` | `overwrite:path = $request.path`, `append:header.X-Origen-Gateway = <secreto>` |
+| `ANY /api/{proxy+}` y `POST /api/auth/token/` | HTTP → `http://<IP backend>` | `overwrite:path = $request.path`, `append:header.X-Origen-Gateway = <secreto>`, `overwrite:header.X-Ip-Cliente = $context.identity.sourceIp` |
 | `ANY /admin` y `ANY /admin/{proxy+}` | HTTP → `http://<IP backend>` | igual que la anterior |
 | `GET /media/{proxy+}` y `GET /static/{proxy+}` | HTTP → `https://<bucket>.s3.amazonaws.com` | `overwrite:path = $request.path` |
 | `$default` (todo lo demás) | HTTP → `http://<IP frontend>` | `overwrite:path = $request.path`, `append:header.X-Origen-Gateway = <secreto>` |
@@ -87,7 +87,8 @@ La documentación completa (Swagger) está en `/api/docs/`.
 | Django (DRF), resto de la API | 60/min sin sesión (por IP) · 600/min por usuario | Abuso de un mismo cliente |
 
 Quien supera un límite recibe **429 Too Many Requests**. La API Gateway limita el total de tráfico;
-Django limita a cada cliente por separado (la IP real se toma de `X-Forwarded-For`, con `NUM_PROXIES=2`).
+Django limita a cada cliente por separado: la API Gateway le entrega la IP real en la cabecera
+`X-Ip-Cliente` (mapeo `overwrite:header.X-Ip-Cliente = $context.identity.sourceIp` en las integraciones del backend).
 
 ## Pruebas
 
