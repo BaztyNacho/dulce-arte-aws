@@ -3,7 +3,7 @@ Función Lambda "dulce-arte-tareas" de Dulce Arte (serverless: no vive en ningú
 
 Hace dos trabajos, según quién la llame:
 
-1) RESPALDO AUTOMÁTICO  (la llama EventBridge todos los días, o el botón "Probar")
+1) RESPALDO AUTOMÁTICO  (la llama EventBridge cada 7 horas, o el botón "Probar")
    - Pide al backend, a través de la API Gateway, que genere un respaldo:
        POST https://<api-gateway>/api/respaldos/   con la cabecera X-Token-Respaldo
    - El backend exporta la base de datos (RDS) y la guarda en S3: respaldos/automaticos/
@@ -63,7 +63,7 @@ def hacer_respaldo():
 
     registros = '\n'.join(f'  - {nombre}: {cantidad}' for nombre, cantidad in datos['registros'].items())
     publicar(
-        'Respaldo diario completado',
+        'Respaldo completado',
         f'Se respaldó la base de datos el {datos["fecha"]}.\n\n'
         f'Archivo: {datos["archivo"]}\n'
         f'Tamaño: {datos["tamano_kb"]} KB (comprimido)\n'

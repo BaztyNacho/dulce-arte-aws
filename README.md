@@ -10,7 +10,7 @@ El proyecto de la EVA3 (un solo servidor con Django) se separa en servicios de A
                          │  /api/*  /admin/*  → EC2 BACKEND (Django API + Gunicorn + Nginx) ──► RDS PostgreSQL (privada)│
                          │  /media/*  /static/* → S3 (imágenes, firmas, CSS del Admin)                                  │
                          └──────────────────────────────────────────────────────────────────────────────────────────────┘
- EventBridge (todos los días) ──► Lambda (serverless) ──► respaldo en S3 /respaldos  +  aviso por correo con SNS
+ EventBridge (cada 7 horas) ──► Lambda (serverless) ──► respaldo en S3 /respaldos  +  aviso por correo con SNS
 ```
 
 | Carpeta | Qué contiene | Dónde corre |
@@ -75,6 +75,19 @@ La documentación completa (Swagger) está en `/api/docs/`.
 - La cabecera secreta `X-Origen-Gateway` hace que el backend (Django) y el frontend (Nginx) rechacen con 403
   a quien intente entrar directo a sus IP. El secreto vive solo en la API Gateway y en los servidores, nunca en GitHub.
 - `overwrite:path` envía la ruta original completa (con su barra final) a cada servidor.
+
+## Rate limit (dos capas)
+
+| Capa | Límite | Qué protege |
+|---|---|---|
+| API Gateway, toda la etapa `$default` | 50 peticiones/s, ráfaga de 100 | Que un exceso de tráfico llegue a las EC2 y a RDS |
+| API Gateway, ruta `POST /api/auth/token/` | 5 peticiones/s, ráfaga de 10 | El inicio de sesión |
+| Django (DRF), inicio de sesión | 10 intentos/min por IP | Fuerza bruta de contraseñas |
+| Django (DRF), contraseña del Admin | 5 intentos/min por usuario | Fuerza bruta del acceso al Admin |
+| Django (DRF), resto de la API | 60/min sin sesión (por IP) · 600/min por usuario | Abuso de un mismo cliente |
+
+Quien supera un límite recibe **429 Too Many Requests**. La API Gateway limita el total de tráfico;
+Django limita a cada cliente por separado (la IP real se toma de `X-Forwarded-For`, con `NUM_PROXIES=2`).
 
 ## Pruebas
 

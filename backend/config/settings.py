@@ -232,6 +232,22 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    # Rate limit dentro de Django (segunda capa, después del límite de la API Gateway).
+    # Quien se pasa recibe 429 "Too Many Requests". Los contadores se guardan en la caché
+    # de la base de datos, compartida por todos los procesos de Gunicorn.
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',   # sin sesión: por IP
+        'rest_framework.throttling.UserRateThrottle',   # con sesión: por usuario
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': env('LIMITE_ANONIMO', default='60/min'),
+        'user': env('LIMITE_USUARIO', default='600/min'),
+        'login': env('LIMITE_LOGIN', default='10/min'),            # intentos de inicio de sesión por IP
+        'admin_acceso': env('LIMITE_ACCESO_ADMIN', default='5/min'),  # contraseña antes del Admin
+    },
+    # Cuántos intermediarios agregan su IP a X-Forwarded-For antes de Django
+    # (API Gateway + Nginx = 2). Así se usa la IP real del cliente y no la del intermediario.
+    'NUM_PROXIES': env.int('NUM_PROXIES', default=2),
 }
 
 SIMPLE_JWT = {
@@ -272,7 +288,7 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
 # Token que la Lambda envía en la cabecera X-Token-Respaldo para pedir un respaldo
 RESPALDO_TOKEN = env('RESPALDO_TOKEN', default='')
 # Cuántos respaldos automáticos se guardan en S3 (los más antiguos se borran)
-RESPALDOS_A_CONSERVAR = env.int('RESPALDOS_A_CONSERVAR', default=14)
+RESPALDOS_A_CONSERVAR = env.int('RESPALDOS_A_CONSERVAR', default=24)   # 24 respaldos cada 7 h ≈ 1 semana
 # Nombre de la función Lambda que publica los avisos en SNS. Vacío = sin avisos.
 LAMBDA_AVISOS = env('LAMBDA_AVISOS', default='')
 AWS_REGION_AVISOS = env('AWS_REGION_AVISOS', default='us-east-1')

@@ -105,3 +105,38 @@ class GatewayTests(TestCase):
             middleware(fabrica.get('/api/pedidos/', HTTP_X_ORIGEN_GATEWAY='secreto-de-prueba')).status_code, 200
         )
         self.assertEqual(middleware(fabrica.get('/api/salud/')).status_code, 200)
+
+
+class RateLimitTests(BaseDulceArte):
+    """El rate limit de Django responde 429 cuando se supera el límite."""
+
+    def setUp(self):
+        from django.core.cache import cache
+        cache.clear()
+
+    def test_login_bloqueado_tras_superar_el_limite(self):
+        from unittest import mock
+
+        from cuentas.views import LimiteLogin
+
+        with mock.patch.object(LimiteLogin, 'THROTTLE_RATES', {'login': '3/min'}):
+            cliente = APIClient()
+            datos = {'username': 'cocinero', 'password': 'mala'}
+            respuestas = [cliente.post('/api/auth/token/', datos, format='json').status_code for _ in range(4)]
+        self.assertEqual(respuestas, [401, 401, 401, 429])
+
+    def test_ip_real_del_cliente_detras_de_api_gateway_y_nginx(self):
+        from rest_framework.settings import api_settings
+
+        with mock_num_proxies(2):
+            # La API Gateway agrega la IP del cliente y Nginx la de la API Gateway
+            datos = APIClient().get('/api/salud/', HTTP_X_FORWARDED_FOR='1.2.3.4, 200.1.1.1, 10.0.0.9').json()
+        self.assertEqual(datos['tu_ip'], '200.1.1.1')   # se ignora la IP falsa 1.2.3.4
+        self.assertIsNone(api_settings.NUM_PROXIES)
+
+
+def mock_num_proxies(valor):
+    from unittest import mock
+
+    from rest_framework.settings import api_settings
+    return mock.patch.object(api_settings, 'NUM_PROXIES', valor, create=True)

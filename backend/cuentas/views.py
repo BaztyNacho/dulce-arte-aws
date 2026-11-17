@@ -8,7 +8,8 @@ from django.db import connection
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -20,10 +21,23 @@ from .serializers import PasswordSerializer, TokenConRolSerializer, datos_usuari
 MAX_INTENTOS_ADMIN = 5
 
 
+class LimiteLogin(AnonRateThrottle):
+    """Máximo 10 intentos de inicio de sesión por minuto desde una misma IP (contra fuerza bruta)."""
+
+    scope = 'login'
+
+
+class LimiteAccesoAdmin(UserRateThrottle):
+    """Máximo 5 intentos por minuto de la contraseña antes del Admin."""
+
+    scope = 'admin_acceso'
+
+
 class IniciarSesionView(TokenObtainPairView):
     """POST usuario + contraseña -> tokens JWT y datos del usuario con su rol."""
 
     serializer_class = TokenConRolSerializer
+    throttle_classes = [LimiteLogin]
 
 
 @extend_schema(responses=OpenApiTypes.OBJECT)
@@ -37,6 +51,7 @@ def yo(request):
 @extend_schema(request=PasswordSerializer, responses=None)
 @api_view(['POST'])
 @permission_classes([EsAdministrador])
+@throttle_classes([LimiteAccesoAdmin])
 def acceso_admin(request):
     """
     Antes de entrar al panel de Administración (Django Admin) se vuelve a pedir la contraseña.
@@ -71,10 +86,12 @@ def acceso_admin(request):
 @extend_schema(responses=None)
 @api_view(['GET'])
 @permission_classes([AllowAny])
+@throttle_classes([])
 def salud(request):
     """
     Revisión de salud: la usa la API Gateway / el profesor para comprobar que el backend
-    está vivo y conectado a la base de datos RDS.
+    está vivo y conectado a la base de datos RDS. Muestra además la IP con la que el
+    rate limit identifica al cliente (debe ser la IP pública de quien consulta).
     """
     try:
         with connection.cursor() as cursor:
@@ -82,4 +99,8 @@ def salud(request):
         base_datos = 'ok'
     except Exception:  # noqa: BLE001 - solo informamos el estado
         base_datos = 'sin conexión'
-    return Response({'estado': 'ok', 'base_datos': base_datos})
+    return Response({
+        'estado': 'ok',
+        'base_datos': base_datos,
+        'tu_ip': AnonRateThrottle().get_ident(request),
+    })

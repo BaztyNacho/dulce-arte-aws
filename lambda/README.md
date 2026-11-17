@@ -4,7 +4,7 @@ Función serverless (Python 3.13) que corre fuera de los servidores, solo cuando
 
 | Quién la llama | Qué hace |
 |---|---|
-| **EventBridge Scheduler** (todos los días) o el botón **Probar** | Pide al backend `POST /api/respaldos/` (a través de la API Gateway), que guarda la base de datos en S3 `respaldos/automaticos/`, y publica el resultado en SNS |
+| **EventBridge Scheduler** (cada 7 horas) o el botón **Probar** | Pide al backend `POST /api/respaldos/` (a través de la API Gateway), que guarda la base de datos en S3 `respaldos/automaticos/`, y publica el resultado en SNS |
 | **Backend** (insumo bajo el mínimo, pedido listo) | Publica el aviso en SNS |
 
 SNS (`dulce-arte-avisos`) envía cada mensaje por correo a los suscriptores.

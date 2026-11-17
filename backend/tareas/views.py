@@ -17,7 +17,7 @@ from django.conf import settings
 from django.core.management import call_command
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.decorators import api_view, authentication_classes, permission_classes, throttle_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
@@ -32,6 +32,7 @@ PREFIJO = 'respaldos/automaticos/'
 @api_view(['POST'])
 @authentication_classes([])          # no usa JWT: se protege con un token propio
 @permission_classes([AllowAny])
+@throttle_classes([])                # la Lambda no debe quedar bloqueada por el rate limit
 def respaldo(request):
     token = request.headers.get('X-Token-Respaldo', '')
     if not settings.RESPALDO_TOKEN or not hmac.compare_digest(token, settings.RESPALDO_TOKEN):
