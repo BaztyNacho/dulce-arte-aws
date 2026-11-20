@@ -132,10 +132,16 @@ DATABASES = {
         'CONN_MAX_AGE': 60,
         'OPTIONS': {
             'connect_timeout': 5,
-            'sslmode': env('DB_SSLMODE', default='prefer'),   # RDS acepta conexión cifrada
+            # Cifrado en tránsito entre Django y RDS (TLS):
+            #   require      -> la conexión siempre va cifrada
+            #   verify-full  -> además comprueba que el servidor sea de verdad RDS,
+            #                   con el certificado de AWS indicado en DB_SSLROOTCERT
+            'sslmode': env('DB_SSLMODE', default='require'),
         },
     }
 }
+if env('DB_SSLROOTCERT', default=''):
+    DATABASES['default']['OPTIONS']['sslrootcert'] = env('DB_SSLROOTCERT')
 
 # Caché en la base de datos: comparte entre los procesos de Gunicorn el conteo
 # de intentos fallidos al entrar al Admin. Se crea con: python manage.py createcachetable

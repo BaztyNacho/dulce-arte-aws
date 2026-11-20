@@ -90,6 +90,17 @@ Quien supera un límite recibe **429 Too Many Requests**. La API Gateway limita 
 Django limita a cada cliente por separado: la API Gateway le entrega la IP real en la cabecera
 `X-Ip-Cliente` (mapeo `overwrite:header.X-Ip-Cliente = $context.identity.sourceIp` en las integraciones del backend).
 
+## Cifrado
+
+| Dónde | En reposo (guardado) | En tránsito (viajando) |
+|---|---|---|
+| **RDS** | AWS KMS, AES-256 (clave `aws/rds`): datos, respaldos automáticos y snapshots | TLS obligatorio: `rds.force_ssl = 1` en RDS y `sslmode=verify-full` en Django con el certificado de AWS |
+| **S3** | SSE-S3, AES-256 (clave administrada por S3), en todos los objetos | Solo HTTPS: la política del bucket rechaza conexiones sin TLS (`aws:SecureTransport`) |
+| **Navegador ↔ API Gateway** | — | HTTPS (TLS 1.2 o superior) |
+| **Lambda** | Variables de entorno cifradas con AWS KMS | HTTPS hacia la API Gateway y SNS |
+
+`backend/deploy/verificar_cifrado.py` muestra si la conexión Django → RDS va cifrada y con qué algoritmo.
+
 ## Pruebas
 
 ```bash
