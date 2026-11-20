@@ -85,7 +85,8 @@ class Command(BaseCommand):
         if Producto.objects.filter(activo=True).count() < 5:
             raise CommandError('Primero ejecuta "python manage.py cargar_catalogo".')
 
-        self.azar = random.Random(2026)          # semilla fija: siempre los mismos datos
+        # Solo genera datos de demostración (no es criptografía), por eso se marca como revisado
+        self.azar = random.Random(2026)  # nosec B311
         self.ahora = timezone.localtime()
         self.admin = User.objects.filter(is_superuser=True).order_by('pk').first()
         if not self.admin:

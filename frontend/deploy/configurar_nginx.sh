@@ -18,6 +18,8 @@ else
   REGLA="# Sin cabecera secreta: acepta peticiones directas"
 fi
 
+sudo mkdir -p /etc/nginx/snippets
+sudo cp deploy/cabeceras_seguridad.conf /etc/nginx/snippets/dulce_cabeceras.conf
 sed "s|# REVISION_GATEWAY.*|${REGLA}|" deploy/nginx_frontend.conf | sudo tee /etc/nginx/sites-available/dulce_frontend > /dev/null
 sudo chmod 640 /etc/nginx/sites-available/dulce_frontend
 sudo ln -sf /etc/nginx/sites-available/dulce_frontend /etc/nginx/sites-enabled/dulce_frontend

@@ -1,0 +1,38 @@
+# ---------------------------------------------------------------
+# DAST (análisis dinámico): ataca la aplicación YA FUNCIONANDO, desde afuera,
+# como lo haría un atacante. Usa OWASP ZAP en modo "baseline":
+#   - recorre el sitio por la API Gateway
+#   - revisa cabeceras de seguridad, cookies, errores expuestos, información filtrada...
+#   - es pasivo: no intenta romper ni modificar datos
+# Se ejecuta a mano (botón "Run workflow") y cada lunes. El Learner Lab debe estar
+# encendido (RDS y las dos EC2); si no, ZAP no encontrará el sitio.
+# Resultados: informe HTML en "Artifacts" de la ejecución.
+# ---------------------------------------------------------------
+name: DAST - OWASP ZAP
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'Dirección a analizar'
+        default: 'https://kh6uimo2ob.execute-api.us-east-1.amazonaws.com/'
+  schedule:
+    - cron: '0 13 * * 1'      # lunes 13:00 UTC (10:00 en Chile)
+
+permissions:
+  contents: read
+
+jobs:
+  zap:
+    name: OWASP ZAP baseline
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Escaneo con OWASP ZAP
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: ${{ github.event.inputs.url || 'https://kh6uimo2ob.execute-api.us-east-1.amazonaws.com/' }}
+          cmd_options: '-a -j'          # -a: reglas alfa  -j: recorre también las rutas de React (AJAX)
+          allow_issue_writing: false    # no crea "issues" en GitHub; el informe queda en Artifacts
+          fail_action: false
+          artifact_name: informe-zap

@@ -101,6 +101,22 @@ Django limita a cada cliente por separado: la API Gateway le entrega la IP real 
 
 `backend/deploy/verificar_cifrado.py` muestra si la conexión Django → RDS va cifrada y con qué algoritmo.
 
+## Desarrollo seguro: SAST y DAST
+
+| Tipo | Herramienta | Qué revisa | Cuándo |
+|---|---|---|---|
+| SAST (código) | **Bandit** | Código Python inseguro | Cada `git push` (`.github/workflows/sast.yml`) |
+| SAST (código) | **Semgrep** | Reglas de seguridad de Django y React | Cada `git push` |
+| SCA (dependencias) | **pip-audit** / **npm audit** | Librerías con vulnerabilidades conocidas (CVE) | Cada `git push` |
+| DAST (app funcionando) | **OWASP ZAP** baseline | Cabeceras, cookies, información expuesta, por la API Gateway | A mano y cada lunes (`.github/workflows/dast.yml`) |
+
+Hallazgos corregidos:
+- `npm audit` encontró vulnerabilidades altas en `react-router-dom 7.9.1` (redirecciones abiertas, XSS) y `vite 7.1.5` (lectura de archivos del servidor de desarrollo): se actualizaron a 7.18.6 y 7.3.8.
+- Bandit marcó `random` en `cargar_demo` (solo datos de demostración, no criptografía): revisado y marcado `# nosec B311`.
+- Cabeceras de seguridad en Nginx (`frontend/deploy/cabeceras_seguridad.conf`): HSTS, CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy y Permissions-Policy; versión de Nginx oculta.
+
+Otras prácticas: secretos solo en `.env` (fuera de GitHub), JWT y permisos por rol en cada endpoint, ORM de Django (evita inyección SQL), React escapa el HTML (evita XSS), CSRF en el Admin, rate limit, grupos de seguridad mínimos y cabecera secreta de la API Gateway.
+
 ## Pruebas
 
 ```bash
