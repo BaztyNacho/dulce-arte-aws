@@ -95,7 +95,7 @@ Django limita a cada cliente por separado: la API Gateway le entrega la IP real 
 | Dónde | En reposo (guardado) | En tránsito (viajando) |
 |---|---|---|
 | **RDS** | AWS KMS, AES-256 (clave `aws/rds`): datos, respaldos automáticos y snapshots | TLS obligatorio: `rds.force_ssl = 1` en RDS y `sslmode=verify-full` en Django con el certificado de AWS |
-| **S3** | SSE-S3, AES-256 (clave administrada por S3), en todos los objetos | Solo HTTPS: la política del bucket rechaza conexiones sin TLS (`aws:SecureTransport`) |
+| **S3** | SSE-S3, AES-256 (clave administrada por S3), en todos los objetos: fotos, firmas, CSS, fuentes y respaldos | Solo HTTPS: la política del bucket rechaza conexiones sin TLS (`aws:SecureTransport`) |
 | **Navegador ↔ API Gateway** | — | HTTPS (TLS 1.2 o superior) |
 | **Lambda** | Variables de entorno cifradas con AWS KMS | HTTPS hacia la API Gateway y SNS |
 
@@ -114,6 +114,13 @@ Hallazgos corregidos:
 - `npm audit` encontró vulnerabilidades altas en `react-router-dom 7.9.1` (redirecciones abiertas, XSS) y `vite 7.1.5` (lectura de archivos del servidor de desarrollo): se actualizaron a 7.18.6 y 7.3.8.
 - Bandit marcó `random` en `cargar_demo` (solo datos de demostración, no criptografía): revisado y marcado `# nosec B311`.
 - Cabeceras de seguridad en Nginx (`frontend/deploy/cabeceras_seguridad.conf`): HSTS, CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy y Permissions-Policy; versión de Nginx oculta.
+
+Resultado del primer DAST (OWASP ZAP, 20-11): 0 alertas altas, 2 medias, 3 bajas y alertas informativas.
+- **Media, CSP con `style-src 'unsafe-inline'`:** se quitó. React aplica sus estilos con JavaScript (CSSOM), que la CSP no bloquea.
+- **Media, falta Sub Resource Integrity en Google Fonts:** las tipografías ahora están en **S3** (`static/fuentes/`), servidas por la API Gateway. La CSP queda en `font-src 'self'` y `style-src 'self'`.
+- **Bajas, COOP y CORP:** se agregaron `Cross-Origin-Opener-Policy` y `Cross-Origin-Resource-Policy`.
+- **Baja, COEP:** no se agrega `require-corp`, porque bloquearía el mapa de Google Maps (riesgo aceptado).
+- **Informativas** (caché, cabeceras Sec-Fetch de la petición, "aplicación web moderna"): no son vulnerabilidades.
 
 Otras prácticas: secretos solo en `.env` (fuera de GitHub), JWT y permisos por rol en cada endpoint, ORM de Django (evita inyección SQL), React escapa el HTML (evita XSS), CSRF en el Admin, rate limit, grupos de seguridad mínimos y cabecera secreta de la API Gateway.
 

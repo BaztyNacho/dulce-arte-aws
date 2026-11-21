@@ -1,12 +1,12 @@
 {% extends "admin/base.html" %}
+{% load static %}
 
 {% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
 
 {% block extrastyle %}
 {{ block.super }}
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+{# Tipografía alojada en S3 (static/fuentes/), ya no en Google Fonts #}
+<link href="{% static 'fuentes/fuentes.css' %}" rel="stylesheet">
 <style>
   /* Paleta Dulce Arte: chocolate, frambuesa, caramelo y crema */
   :root, html[data-theme="light"] {

@@ -1,0 +1,43 @@
+/*
+ * Tipografías de Dulce Arte, alojadas en Amazon S3 (static/fuentes/) y servidas por la API Gateway.
+ * Antes se cargaban desde Google Fonts; tenerlas en nuestro propio bucket:
+ *   - cumple el requisito de guardar las fuentes en S3,
+ *   - evita depender de un sitio externo (y la alerta "Sub Resource Integrity" de OWASP ZAP),
+ *   - permite una política CSP más estricta (font-src 'self').
+ * Licencia: SIL Open Font License (ver LICENCIA-OFL.txt). Archivos de Fontsource, subconjunto latino.
+ */
+
+/* Fraunces (títulos): fuente variable con los ejes de peso, tamaño óptico, SOFT y WONK */
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('fraunces-latin-full-normal.woff2') format('woff2-variations'),
+       url('fraunces-latin-full-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Work Sans (texto) */
+@font-face {
+  font-family: 'Work Sans'; font-style: normal; font-display: swap; font-weight: 400;
+  src: url('work-sans-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Work Sans'; font-style: normal; font-display: swap; font-weight: 500;
+  src: url('work-sans-latin-500-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Work Sans'; font-style: normal; font-display: swap; font-weight: 600;
+  src: url('work-sans-latin-600-normal.woff2') format('woff2');
+}
+
+/* Playfair Display (títulos del panel de Administración) */
+@font-face {
+  font-family: 'Playfair Display'; font-style: normal; font-display: swap; font-weight: 600;
+  src: url('playfair-display-latin-600-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Playfair Display'; font-style: normal; font-display: swap; font-weight: 700;
+  src: url('playfair-display-latin-700-normal.woff2') format('woff2');
+}

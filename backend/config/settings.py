@@ -212,6 +212,8 @@ else:
     STATIC_URL = 'static/'
     MEDIA_URL = 'media/'
 
+# Archivos estáticos propios (tipografías). collectstatic los sube a S3: static/fuentes/
+STATICFILES_DIRS = [BASE_DIR / 'recursos']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_ROOT = BASE_DIR / 'media'
 

@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Dulce Arte</title>
   <link rel="icon" type="image/png" href="/favicon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,500..700,100,1&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Tipografías alojadas en S3 (static/fuentes/), servidas por la API Gateway -->
+  <link rel="preload" href="/static/fuentes/fraunces-latin-full-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/static/fuentes/fuentes.css">
 </head>
 <body>
   <div id="raiz"></div>
