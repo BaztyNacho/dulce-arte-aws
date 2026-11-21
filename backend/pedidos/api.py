@@ -3,6 +3,7 @@ API REST de PEDIDOS (vistas de Django REST Framework).
 """
 
 from django.db.models import Q
+from django.http import HttpResponse
 from drf_spectacular.utils import extend_schema
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -134,6 +135,25 @@ class PedidoViewSet(viewsets.ModelViewSet):
         motivo = MotivoSerializer(data=request.data)
         motivo.is_valid(raise_exception=True)
         return self._ejecutar(cancelar_pedido, motivo.validated_data.get('motivo', ''))
+
+    @extend_schema(responses={(200, 'application/pdf'): bytes})
+    @action(detail=True, methods=['get'])
+    def pdf(self, request, pk=None):
+        """
+        Comprobante del pedido en PDF. Se guarda una copia en S3 (carpeta privada descargas/)
+        y se entrega como descarga a quien tenga permiso para ver el pedido.
+        """
+        from .documentos import generar_comprobante, guardar_en_s3
+
+        pedido = self.get_object()
+        contenido = generar_comprobante(pedido)
+        nombre = f'pedidos/pedido-{pedido.pk}.pdf'
+        copia = guardar_en_s3(nombre, contenido)
+        respuesta = HttpResponse(contenido, content_type='application/pdf')
+        respuesta['Content-Disposition'] = f'attachment; filename="dulce-arte-pedido-{pedido.pk}.pdf"'
+        if copia:
+            respuesta['X-Copia-S3'] = copia
+        return respuesta
 
     @action(detail=True, methods=['get'])
     def disponibilidad(self, request, pk=None):

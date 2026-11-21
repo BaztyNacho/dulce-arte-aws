@@ -122,3 +122,30 @@ export function textosDeError(datos) {
 export function primerError(datos) {
   return textosDeError(datos)[0];
 }
+
+/**
+ * Descarga un archivo protegido (por ejemplo el PDF de un pedido) usando el token JWT.
+ * El navegador no puede enviar el token en un enlace normal, por eso se pide con fetch
+ * y se entrega al usuario como descarga. Devuelve null si salió bien o un texto de error.
+ */
+export async function descargarArchivo(url, nombre, reintento = true) {
+  let respuesta;
+  try {
+    respuesta = await fetch(url, { headers: accessEnMemoria ? { Authorization: `Bearer ${accessEnMemoria}` } : {} });
+  } catch {
+    return 'No hay conexión con el servidor. Inténtalo de nuevo.';
+  }
+  if (respuesta.status === 401 && reintento && (await renovarAccess())) return descargarArchivo(url, nombre, false);
+  if (!respuesta.ok) {
+    const datos = await respuesta.json().catch(() => null);
+    return primerError(datos);
+  }
+  const enlace = document.createElement('a');
+  enlace.href = URL.createObjectURL(await respuesta.blob());
+  enlace.download = nombre;
+  document.body.appendChild(enlace);
+  enlace.click();
+  enlace.remove();
+  setTimeout(() => URL.revokeObjectURL(enlace.href), 10000);
+  return null;
+}

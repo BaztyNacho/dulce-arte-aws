@@ -5,7 +5,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
-import { llamarApi, textosDeError } from '../api.js';
+import { descargarArchivo, llamarApi, textosDeError } from '../api.js';
 import { Sello } from '../componentes/Comanda.jsx';
 import Pagina, { Cargando, useAvisos } from '../componentes/Pagina.jsx';
 import { useSesion } from '../sesion.jsx';
@@ -31,7 +31,12 @@ export default function PedidoDetalle() {
     <Pagina
       titulo={`Pedido #${pedido.id}`}
       subtitulo={`Registrado el ${fecha}, ${hora(creado)}${pedido.creado_por_nombre ? ` por ${pedido.creado_por_nombre}` : ''}.`}
-      opciones={<div className="banner__opciones"><Link className="boton boton--secundario" to="/pedidos">Volver a pedidos</Link></div>}
+      opciones={(
+        <div className="banner__opciones">
+          <Link className="boton boton--secundario" to="/pedidos">Volver a pedidos</Link>
+          <BotonPdf pedido={pedido} />
+        </div>
+      )}
     >
       <div className="grilla-2">
         <div>
@@ -107,6 +112,23 @@ export default function PedidoDetalle() {
         </aside>
       </div>
     </Pagina>
+  );
+}
+
+/** Descarga el comprobante en PDF (el backend guarda además una copia en S3) */
+function BotonPdf({ pedido }) {
+  const avisar = useAvisos();
+  const [descargando, setDescargando] = useState(false);
+  async function descargar() {
+    setDescargando(true);
+    const error = await descargarArchivo(`/api/pedidos/${pedido.id}/pdf/`, `dulce-arte-pedido-${pedido.id}.pdf`);
+    setDescargando(false);
+    if (error) avisar(error, 'error');
+  }
+  return (
+    <button className="boton" type="button" onClick={descargar} disabled={descargando}>
+      {descargando ? 'Generando PDF…' : 'Descargar PDF'}
+    </button>
   );
 }
 

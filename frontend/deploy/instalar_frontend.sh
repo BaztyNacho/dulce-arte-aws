@@ -20,8 +20,8 @@ echo "    Node.js $(node -v), npm $(npm -v)"
 echo "2/5 Instalando las librerías de React (npm ci)..."
 npm ci --no-audit --no-fund
 
-echo "3/5 Compilando React (npm run build -> carpeta dist/)..."
-npm run build
+echo "3/5 Compilando React (y subiendo sus archivos a S3 si S3_BUCKET está en .env)..."
+bash deploy/publicar.sh
 
 echo "4/5 Dando permiso a Nginx para leer la carpeta..."
 chmod o+x /home/ubuntu /home/ubuntu/dulce-arte-aws /home/ubuntu/dulce-arte-aws/frontend

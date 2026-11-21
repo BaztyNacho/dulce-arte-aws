@@ -10,6 +10,9 @@ backend/staticfiles/
 # Node / React (Etapa 4)
 node_modules/
 frontend/dist/
+frontend/dist-nuevo/
+frontend/dist-anterior/
+frontend/.env
 .env.local
 
 # Lambda (Etapa 6)
@@ -19,3 +22,6 @@ lambda/*.zip
 .DS_Store
 Thumbs.db
 .vscode/
+
+dist-nuevo/
+dist-anterior/

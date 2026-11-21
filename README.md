@@ -48,7 +48,7 @@ Pantallas (una petición por pantalla de React):
 | `/ingresar` | `POST /api/auth/token/` | todos |
 | `/` Inicio | `GET /api/pantallas/inicio/` | todos (cada rol recibe su inicio) |
 | `/pedidos` | `GET /api/pantallas/pedidos/?estado=&q=&pagina=` | Ventas, Cocina, Admin |
-| `/pedidos/:id` | `GET /api/pedidos/:id/` (+ `disponibilidad/`, `confirmar/`, `imagen-referencia/`) | Ventas, Cocina, Admin |
+| `/pedidos/:id` | `GET /api/pedidos/:id/` (+ `disponibilidad/`, `confirmar/`, `imagen-referencia/`, `pdf/`) | Ventas, Cocina, Admin |
 | `/catalogo` | `GET /api/pantallas/catalogo/?categoria=` | Ventas |
 | `/pedidos/nuevo` | `GET /api/pantallas/cotizador/` + `POST /api/clientes/` + `POST /api/pedidos/` | Ventas |
 | `/cocina` (Kanban) | `GET /api/pedidos/kanban/` + `POST /api/pedidos/:id/avanzar/` y `rechazar-calidad/` | Cocina (Admin mira) |
@@ -90,6 +90,19 @@ Quien supera un límite recibe **429 Too Many Requests**. La API Gateway limita 
 Django limita a cada cliente por separado: la API Gateway le entrega la IP real en la cabecera
 `X-Ip-Cliente` (mapeo `overwrite:header.X-Ip-Cliente = $context.identity.sourceIp` en las integraciones del backend).
 
+## Contenido estático en S3
+
+| Carpeta del bucket | Contenido | Acceso |
+|---|---|---|
+| `media/` | Fotos de productos e insumos, firmas, comprobantes de entrega | Público de lectura (por la API Gateway) |
+| `static/app/` | JS, CSS e imágenes de React (los sube `frontend/deploy/publicar.sh`) | Público de lectura |
+| `static/fuentes/` | Tipografías Fraunces, Work Sans y Playfair Display | Público de lectura |
+| `static/admin/`, `static/rest_framework/`… | CSS y JS del Django Admin y de Swagger | Público de lectura |
+| `descargas/pedidos/` | Comprobantes de pedido en PDF (`GET /api/pedidos/<id>/pdf/`) | **Privado**: se descarga por la API con JWT |
+| `respaldos/` | Respaldos de la base de datos | **Privado** |
+
+La EC2 del frontend solo entrega `index.html`; todo lo demás lo entrega S3 a través de la API Gateway.
+
 ## Cifrado
 
 | Dónde | En reposo (guardado) | En tránsito (viajando) |
@@ -121,6 +134,13 @@ Resultado del primer DAST (OWASP ZAP, 20-11): 0 alertas altas, 2 medias, 3 bajas
 - **Bajas, COOP y CORP:** se agregaron `Cross-Origin-Opener-Policy` y `Cross-Origin-Resource-Policy`.
 - **Baja, COEP:** no se agrega `require-corp`, porque bloquearía el mapa de Google Maps (riesgo aceptado).
 - **Informativas** (caché, cabeceras Sec-Fetch de la petición, "aplicación web moderna"): no son vulnerabilidades.
+- Segundo informe: aparecieron 4 bajas en los archivos de S3 (`/static/fuentes/`), porque S3 no envía cabeceras de seguridad. Se corrigió con un mapeo de **respuesta** (código 200) en las integraciones de S3 de la API Gateway: `Strict-Transport-Security`, `X-Content-Type-Options`, `Cross-Origin-Resource-Policy` y se elimina `Server`.
+
+| Informe de ZAP | Altas | Medias | Bajas | Informativas |
+|---|---|---|---|---|
+| 1.º (antes de corregir) | 0 | 2 | 3 | 8 |
+| 2.º (fuentes en S3, CSP estricta, COOP y CORP) | 0 | 0 | 5 | 9 |
+| 3.º (cabeceras en las respuestas de S3) | 0 | 0 | 1 (COEP, justificada) | 9 |
 
 Otras prácticas: secretos solo en `.env` (fuera de GitHub), JWT y permisos por rol en cada endpoint, ORM de Django (evita inyección SQL), React escapa el HTML (evita XSS), CSRF en el Admin, rate limit, grupos de seguridad mínimos y cabecera secreta de la API Gateway.
 
