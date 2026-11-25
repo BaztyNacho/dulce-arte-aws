@@ -140,3 +140,21 @@ class RateLimitTests(BaseDulceArte):
             b = APIClient().post('/api/auth/token/', datos, format='json', HTTP_X_IP_CLIENTE='200.2.2.2').status_code
         self.assertEqual(a, [401, 429])   # la IP 200.1.1.1 quedó bloqueada
         self.assertEqual(b, 401)          # otra IP sigue pudiendo intentar
+
+
+class HashContrasenasTests(TestCase):
+    """Las contraseñas se guardan con Argon2 y salt, nunca en texto plano."""
+
+    def test_argon2_y_sin_texto_plano(self):
+        from django.contrib.auth.models import User
+
+        usuario = User.objects.create_user('prueba_hash', password='MiClave.Segura2026')
+        guardado = User.objects.get(pk=usuario.pk).password
+        self.assertTrue(guardado.startswith('argon2$argon2id$'))
+        self.assertNotIn('MiClave.Segura2026', guardado)
+        self.assertTrue(usuario.check_password('MiClave.Segura2026'))
+
+    def test_misma_contrasena_distinto_hash(self):
+        from django.contrib.auth.hashers import make_password
+
+        self.assertNotEqual(make_password('igual'), make_password('igual'))

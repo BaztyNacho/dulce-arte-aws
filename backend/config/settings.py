@@ -154,6 +154,20 @@ CACHES = {
 
 
 # ---------------------------------------------------------------
+# Almacenamiento de contraseñas (hash con salt; nunca se guardan en texto plano)
+# ---------------------------------------------------------------
+# El primero de la lista se usa para las contraseñas nuevas: Argon2id, ganador de la
+# Password Hashing Competition y recomendado por OWASP. Los demás permiten verificar
+# contraseñas antiguas (PBKDF2-SHA256); Django las convierte a Argon2 en el siguiente login.
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.ScryptPasswordHasher',
+]
+
+
+# ---------------------------------------------------------------
 # Validación de contraseñas
 # ---------------------------------------------------------------
 AUTH_PASSWORD_VALIDATORS = [
