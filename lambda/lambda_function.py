@@ -25,8 +25,10 @@ import urllib.error
 import urllib.request
 
 import boto3
+from botocore.config import Config
 
-sns = boto3.client('sns')
+# Tiempos máximos para que la Lambda nunca quede colgada esperando a SNS
+sns = boto3.client('sns', config=Config(connect_timeout=5, read_timeout=10, retries={'max_attempts': 2}))
 
 
 def publicar(asunto, mensaje):

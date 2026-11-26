@@ -31,7 +31,7 @@ export default function Login() {
         {error && <div className="mensaje mensaje--error" role="alert">{error}</div>}
         <div className="campo">
           <label htmlFor="id_username">Usuario</label>
-          <input type="text" name="username" id="id_username" autoComplete="username" required autoFocus />
+          <input type="text" name="username" id="id_username" autoComplete="username" required />
         </div>
         <div className="campo">
           <label htmlFor="id_password">Contraseña</label>

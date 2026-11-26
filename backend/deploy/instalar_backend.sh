@@ -7,7 +7,7 @@
 set -e
 cd /home/ubuntu/dulce-arte-aws/backend
 
-if [ ! -f .env ]; then
+if [[ ! -f .env ]]; then
   echo "Falta el archivo .env. Créalo con:  cp .env.ejemplo .env && nano .env"
   exit 1
 fi
@@ -19,8 +19,9 @@ sudo apt-get install -y -qq python3-venv python3-pip nginx postgresql-client
 echo "2/8 Creando el entorno virtual e instalando librerías..."
 python3 -m venv venv
 source venv/bin/activate
-pip install --quiet --upgrade pip
-pip install --quiet -r requirements.txt
+# --only-binary: solo instala paquetes ya compilados (wheels), sin ejecutar setup.py
+pip install --quiet --only-binary :all: --upgrade pip
+pip install --quiet --only-binary :all: -r requirements.txt
 
 echo "3/8 Revisando la configuración de Django..."
 python manage.py check --deploy --fail-level ERROR
@@ -48,4 +49,4 @@ sudo nginx -t
 sudo systemctl restart nginx
 
 echo ""
-echo "Listo. Prueba en el navegador:  http://<IP elástica>/api/salud/"
+echo "Listo. Prueba en el navegador la ruta /api/salud/ de la API Gateway (https)."

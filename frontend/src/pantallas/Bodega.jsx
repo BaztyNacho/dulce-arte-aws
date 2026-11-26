@@ -213,7 +213,7 @@ function VentanaMovimiento({ insumo, alCerrar, alRegistrar }) {
           </div>
           <div className="campo">
             <label htmlFor="vm-cantidad">Cantidad ({insumo.unidad})</label>
-            <input type="number" id="vm-cantidad" min="0.001" step="0.001" inputMode="decimal" required autoFocus
+            <input type="number" id="vm-cantidad" min="0.001" step="0.001" inputMode="decimal" required
                    value={valor} onChange={(e) => setValor(e.target.value)} />
           </div>
           <div className="campo">

@@ -68,15 +68,20 @@ def respaldo(request):
     if settings.USAR_S3:
         import boto3
 
+        from config.s3 import dueno_del_bucket
+
+        dueno = dueno_del_bucket()
         s3 = boto3.client('s3', region_name=getattr(settings, 'AWS_S3_REGION_NAME', 'us-east-1'))
         s3.put_object(
             Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=nombre, Body=contenido,
-            ContentType='application/gzip',
+            ContentType='application/gzip', ExpectedBucketOwner=dueno,
         )
-        listado = s3.list_objects_v2(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Prefix=PREFIJO).get('Contents', [])
+        listado = s3.list_objects_v2(
+            Bucket=settings.AWS_STORAGE_BUCKET_NAME, Prefix=PREFIJO, ExpectedBucketOwner=dueno,
+        ).get('Contents', [])
         antiguos = sorted(listado, key=lambda o: o['Key'])[:-settings.RESPALDOS_A_CONSERVAR]
         for objeto in antiguos:
-            s3.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=objeto['Key'])
+            s3.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=objeto['Key'], ExpectedBucketOwner=dueno)
         resumen['borrados'] = len(antiguos)
 
     return Response(resumen, status=201)

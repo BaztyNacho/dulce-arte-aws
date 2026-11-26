@@ -25,12 +25,20 @@ function guardar(clave, valor) {
   } catch { /* sin almacenamiento: la sesión dura mientras la pestaña esté abierta */ }
 }
 
-let accessEnMemoria = leer(CLAVE_ACCESS);
+// Un JWT son 3 partes en base64url separadas por puntos. Lo que no tenga esa forma
+// no se guarda (evita guardar en el navegador datos manipulados).
+const FORMATO_JWT = /^[\w-]+\.[\w-]+\.[\w-]+$/;
+function tokenValido(valor) {
+  return typeof valor === 'string' && valor.length < 4096 && FORMATO_JWT.test(valor);
+}
+
+let accessEnMemoria = tokenValido(leer(CLAVE_ACCESS)) ? leer(CLAVE_ACCESS) : null;
 
 export function guardarTokens({ access, refresh }) {
+  if (!tokenValido(access)) return;
   accessEnMemoria = access;
   guardar(CLAVE_ACCESS, access);
-  if (refresh) guardar(CLAVE_REFRESH, refresh);
+  if (tokenValido(refresh)) guardar(CLAVE_REFRESH, refresh);
 }
 
 export function borrarTokens() {

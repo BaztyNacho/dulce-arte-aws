@@ -240,13 +240,13 @@ function VentanaConfirmar({ confirmacion, alConfirmar, alCancelar }) {
           {c.rechazo && (
             <div className="campo">
               <label htmlFor="vc-motivo">¿Qué hay que corregir?</label>
-              <input type="text" id="vc-motivo" maxLength={200} placeholder="Ej.: decoración dispareja" autoFocus
+              <input type="text" id="vc-motivo" maxLength={200} placeholder="Ej.: decoración dispareja"
                      value={motivo} onChange={(e) => setMotivo(e.target.value)} />
             </div>
           )}
           <div className="ventana__acciones">
             <button className="boton boton--secundario" type="button" onClick={alCancelar}>Cancelar</button>
-            <button className={`boton${c.rechazo || c.hacia === 'entregado' ? ' boton--peligro' : ''}`} type="submit" autoFocus={!c.rechazo}>
+            <button className={`boton${c.rechazo || c.hacia === 'entregado' ? ' boton--peligro' : ''}`} type="submit">
               {c.rechazo ? 'Devolver a preparación' : 'Confirmar'}
             </button>
           </div>

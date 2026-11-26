@@ -12,7 +12,8 @@ git pull
 cd backend
 echo "2/5 Instalando librerías nuevas (si las hay)..."
 source venv/bin/activate
-pip install --quiet -r requirements.txt
+# --only-binary: solo instala paquetes ya compilados (wheels), sin ejecutar setup.py
+pip install --quiet --only-binary :all: -r requirements.txt
 
 echo "3/5 Aplicando migraciones en RDS..."
 python manage.py migrate

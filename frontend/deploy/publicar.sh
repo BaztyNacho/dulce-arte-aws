@@ -8,11 +8,12 @@
 # ---------------------------------------------------------------
 set -e
 cd /home/ubuntu/dulce-arte-aws/frontend
-set -a; [ -f .env ] && . ./.env; set +a
+set -a; [[ -f .env ]] && . ./.env; set +a
 
-npx vite build --outDir dist-nuevo --emptyOutDir
+# npm run usa el Vite ya instalado en node_modules (npx podría descargar paquetes)
+npm run build -- --outDir dist-nuevo --emptyOutDir
 
-if [ -n "$S3_BUCKET" ]; then
+if [[ -n "$S3_BUCKET" ]]; then
   echo "Subiendo los archivos de React a s3://${S3_BUCKET}/static/app/ ..."
   node deploy/subir_a_s3.mjs dist-nuevo
 else
@@ -20,6 +21,6 @@ else
 fi
 
 rm -rf dist-anterior
-[ -d dist ] && mv dist dist-anterior
+[[ -d dist ]] && mv dist dist-anterior
 mv dist-nuevo dist
 echo "React publicado."

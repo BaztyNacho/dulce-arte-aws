@@ -12,13 +12,14 @@ sudo apt-get install -y -qq nodejs npm nginx
 # Vite necesita Node.js 20.19+ o 22.12+. Si la versión de Ubuntu es antigua, se instala Node 22 oficial.
 if ! node -e "const [a,b]=process.versions.node.split('.').map(Number); process.exit(a>22||(a===22&&b>=12)||(a===20&&b>=19)?0:1)"; then
   echo "    Node.js $(node -v) es antiguo: instalando Node.js 22..."
-  curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+  curl --proto '=https' --tlsv1.2 -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
   sudo apt-get install -y -qq nodejs
 fi
 echo "    Node.js $(node -v), npm $(npm -v)"
 
 echo "2/5 Instalando las librerías de React (npm ci)..."
-npm ci --no-audit --no-fund
+# --ignore-scripts: no ejecuta scripts de instalación de las librerías (ataques a la cadena de suministro)
+npm ci --ignore-scripts --no-audit --no-fund
 
 echo "3/5 Compilando React (y subiendo sus archivos a S3 si S3_BUCKET está en .env)..."
 bash deploy/publicar.sh

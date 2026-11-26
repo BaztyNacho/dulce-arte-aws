@@ -199,6 +199,8 @@ USAR_S3 = env.bool('USAR_S3', default=False)
 if USAR_S3:
     AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME')
     AWS_S3_REGION_NAME = env('AWS_S3_REGION_NAME', default='us-east-1')
+    # Cuenta AWS dueña del bucket (ExpectedBucketOwner). Vacío = se averigua con STS.
+    AWS_BUCKET_OWNER = env('AWS_BUCKET_OWNER', default='')
     # Sin claves: la EC2 usa el rol LabInstanceProfile (LabRole) para escribir en S3.
     # Las URLs son públicas y sin firma (el bucket permite leer media/ y static/).
     AWS_QUERYSTRING_AUTH = False

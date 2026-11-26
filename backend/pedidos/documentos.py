@@ -152,9 +152,11 @@ def guardar_en_s3(nombre, contenido):
         if settings.USAR_S3:
             import boto3
 
+            from config.s3 import dueno_del_bucket
+
             boto3.client('s3', region_name=getattr(settings, 'AWS_S3_REGION_NAME', 'us-east-1')).put_object(
                 Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=clave, Body=contenido,
-                ContentType='application/pdf',
+                ContentType='application/pdf', ExpectedBucketOwner=dueno_del_bucket(),
             )
             return f's3://{settings.AWS_STORAGE_BUCKET_NAME}/{clave}'
         ruta = Path(settings.MEDIA_ROOT) / clave

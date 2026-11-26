@@ -221,7 +221,7 @@ function VentanaNuevaRuta({ abierta, hoy, alCerrar, alCrear }) {
         <h2 id="vr-titulo">Nueva ruta</h2>
         <div className="campo">
           <label htmlFor="r-nombre">Nombre</label>
-          <input type="text" id="r-nombre" maxLength={100} placeholder="Ej.: Ruta oriente, tarde" required autoFocus
+          <input type="text" id="r-nombre" maxLength={100} placeholder="Ej.: Ruta oriente, tarde" required
                  value={nombre} onChange={(e) => setNombre(e.target.value)} />
         </div>
         <div className="campo">

@@ -101,6 +101,8 @@ function TarjetaUsuario({ usuario, cerrarSesion }) {
   );
 }
 
+const URL_ADMIN = '/admin/';
+
 /** Ventana que pide la contraseña antes de abrir el Django Admin (lo valida el backend) */
 export function VentanaAdmin({ abierta, alCerrar }) {
   const { usuario, cerrarSesion } = useSesion();
@@ -115,7 +117,8 @@ export function VentanaAdmin({ abierta, alCerrar }) {
     setEnviando(false);
     setPassword('');
     if (ok) {
-      window.location.href = datos.url;          // el Django Admin vive en el backend
+      // Dirección fija: nunca se redirige a una URL que venga en la respuesta
+      window.location.assign(URL_ADMIN);         // el Django Admin vive en el backend
     } else if (datos?.cerrar_sesion) {
       cerrarSesion();
     } else {
@@ -130,7 +133,7 @@ export function VentanaAdmin({ abierta, alCerrar }) {
         <p className="ventana__detalle">Por seguridad, confirma la contraseña de <strong>{usuario?.username}</strong>.</p>
         <div className="campo">
           <label htmlFor="ventana-admin-password">Contraseña</label>
-          <input type="password" id="ventana-admin-password" autoComplete="current-password" required autoFocus
+          <input type="password" id="ventana-admin-password" autoComplete="current-password" required
                  value={password} onChange={(e) => setPassword(e.target.value)} />
         </div>
         {error && <p className="ventana__error" role="alert">{error}</p>}

@@ -6,6 +6,8 @@ Uso (en la EC2 backend):
     venv/bin/python manage.py demostrar_hash --usuario cocina1  # además muestra cómo está guardado ese usuario en RDS
 """
 
+import secrets
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password, identify_hasher, make_password
@@ -37,7 +39,8 @@ class Command(BaseCommand):
 
         self.stdout.write(linea)
         self.stdout.write('2. La misma contraseña, guardada dos veces')
-        ejemplo = 'MiClave.Segura2026'
+        # Contraseña de ejemplo generada al azar en cada ejecución (no queda escrita en el código)
+        ejemplo = secrets.token_urlsafe(12)
         uno, dos = make_password(ejemplo), make_password(ejemplo)
         self.stdout.write(f'   Contraseña de ejemplo: {ejemplo}')
         for etiqueta, valor in (('Hash 1', uno), ('Hash 2', dos)):
@@ -48,7 +51,7 @@ class Command(BaseCommand):
         self.stdout.write(f'   ¿Los dos hash son iguales?            {"SÍ" if uno == dos else "NO (cada uno tiene su propio salt)"}')
         self.stdout.write(f'   ¿Aparece la contraseña en el hash?    {"SÍ" if ejemplo in uno else "NO"}')
         self.stdout.write(f'   check_password(correcta)   -> {check_password(ejemplo, uno)}')
-        self.stdout.write(f'   check_password(incorrecta) -> {check_password("otra", uno)}')
+        self.stdout.write(f'   check_password(incorrecta) -> {check_password(ejemplo + "x", uno)}')
 
         usuario = opciones.get('usuario')
         if usuario:

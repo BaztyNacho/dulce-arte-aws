@@ -16,11 +16,13 @@ export function SesionProvider({ children }) {
   // Al abrir la página: si hay un token guardado, se piden los datos del usuario
   useEffect(() => {
     if (!hayToken()) return;
-    llamarApi('/api/auth/yo/').then(({ ok, datos }) => {
-      if (ok) setUsuario(datos);
-      else borrarTokens();
-      setCargando(false);
-    });
+    llamarApi('/api/auth/yo/')
+      .then(({ ok, datos }) => {
+        if (ok) setUsuario(datos);
+        else borrarTokens();
+      })
+      .catch(() => borrarTokens())
+      .finally(() => setCargando(false));
   }, []);
 
   // Si el token vence y no se puede renovar, se vuelve al login

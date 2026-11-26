@@ -11,7 +11,7 @@ set -e
 cd /home/ubuntu/dulce-arte-aws/frontend
 SECRETO="$1"
 
-if [ -n "$SECRETO" ]; then
+if [[ -n "$SECRETO" ]]; then
   REGLA="if (\$http_x_origen_gateway != \"${SECRETO}\") { return 403; }"
   echo "Nginx solo aceptará peticiones que vengan de la API Gateway."
 else

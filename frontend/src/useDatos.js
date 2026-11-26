@@ -15,11 +15,15 @@ export function useDatos(url) {
   useEffect(() => {
     let vigente = true;
     setError(null);
-    llamarApi(url).then(({ ok, datos: respuesta }) => {
-      if (!vigente) return;
-      if (ok) setDatos(respuesta);
-      else setError(primerError(respuesta));
-    });
+    llamarApi(url)
+      .then(({ ok, datos: respuesta }) => {
+        if (!vigente) return;
+        if (ok) setDatos(respuesta);
+        else setError(primerError(respuesta));
+      })
+      .catch(() => {
+        if (vigente) setError('Ocurrió un error inesperado. Inténtalo de nuevo.');
+      });
     return () => { vigente = false; };
   }, [url, version]);
 
