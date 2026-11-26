@@ -1,0 +1,234 @@
+{
+  "widgets": [
+    {
+      "type": "text",
+      "x": 0,
+      "y": 0,
+      "width": 24,
+      "height": 2,
+      "properties": {
+        "markdown": "# Dulce Arte · Monitoreo\nEC2 (backend y frontend) · RDS PostgreSQL · API Gateway (HTTP API) · Lambda de respaldos. Alarma: CPU del backend > 70 % → correo SNS."
+      }
+    },
+    {
+      "type": "alarm",
+      "x": 0,
+      "y": 2,
+      "width": 6,
+      "height": 6,
+      "properties": {
+        "title": "Estado de la alarma",
+        "alarms": [
+          "arn:aws:cloudwatch:us-east-1:875428508320:alarm:dulce-arte-backend-cpu-alta"
+        ]
+      }
+    },
+    {
+      "type": "metric",
+      "x": 6,
+      "y": 2,
+      "width": 18,
+      "height": 6,
+      "properties": {
+        "view": "timeSeries",
+        "region": "us-east-1",
+        "title": "CPU de las EC2 (%)",
+        "stat": "Average",
+        "period": 300,
+        "metrics": [
+          [
+            {
+              "expression": "SEARCH('{AWS/EC2,InstanceId} MetricName=\"CPUUtilization\"', 'Average', 300)",
+              "id": "e1",
+              "label": ""
+            }
+          ]
+        ],
+        "yAxis": {
+          "left": {
+            "min": 0,
+            "max": 100
+          }
+        },
+        "annotations": {
+          "horizontal": [
+            {
+              "label": "Umbral alarma 70 %",
+              "value": 70,
+              "color": "#d62728"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 8,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "view": "timeSeries",
+        "region": "us-east-1",
+        "title": "API Gateway · peticiones y errores",
+        "stat": "Sum",
+        "period": 300,
+        "metrics": [
+          [
+            {
+              "expression": "SEARCH('{AWS/ApiGateway,ApiId,Stage} ApiId=\"kh6uimo2ob\" MetricName=\"Count\"', 'Sum', 300)",
+              "id": "a1",
+              "label": "Peticiones"
+            }
+          ],
+          [
+            {
+              "expression": "SEARCH('{AWS/ApiGateway,ApiId,Stage} ApiId=\"kh6uimo2ob\" MetricName=\"4xx\"', 'Sum', 300)",
+              "id": "a2",
+              "label": "Errores 4xx (incluye 429)"
+            }
+          ],
+          [
+            {
+              "expression": "SEARCH('{AWS/ApiGateway,ApiId,Stage} ApiId=\"kh6uimo2ob\" MetricName=\"5xx\"', 'Sum', 300)",
+              "id": "a3",
+              "label": "Errores 5xx"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12,
+      "y": 8,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "view": "timeSeries",
+        "region": "us-east-1",
+        "title": "API Gateway · latencia (ms)",
+        "stat": "Average",
+        "period": 300,
+        "metrics": [
+          [
+            {
+              "expression": "SEARCH('{AWS/ApiGateway,ApiId,Stage} ApiId=\"kh6uimo2ob\" MetricName=\"Latency\"', 'Average', 300)",
+              "id": "l1",
+              "label": "Latencia total"
+            }
+          ],
+          [
+            {
+              "expression": "SEARCH('{AWS/ApiGateway,ApiId,Stage} ApiId=\"kh6uimo2ob\" MetricName=\"IntegrationLatency\"', 'Average', 300)",
+              "id": "l2",
+              "label": "Latencia del backend"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 14,
+      "width": 8,
+      "height": 6,
+      "properties": {
+        "view": "timeSeries",
+        "region": "us-east-1",
+        "title": "RDS · CPU (%) y conexiones",
+        "stat": "Average",
+        "period": 300,
+        "metrics": [
+          [
+            "AWS/RDS",
+            "CPUUtilization",
+            "DBInstanceIdentifier",
+            "dulce-arte-db",
+            {
+              "label": "CPU %"
+            }
+          ],
+          [
+            "AWS/RDS",
+            "DatabaseConnections",
+            "DBInstanceIdentifier",
+            "dulce-arte-db",
+            {
+              "label": "Conexiones",
+              "yAxis": "right"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "type": "metric",
+      "x": 8,
+      "y": 14,
+      "width": 8,
+      "height": 6,
+      "properties": {
+        "view": "timeSeries",
+        "region": "us-east-1",
+        "title": "RDS · espacio libre (GB)",
+        "stat": "Average",
+        "period": 300,
+        "metrics": [
+          [
+            {
+              "expression": "m1/1073741824",
+              "id": "g1",
+              "label": "GB libres"
+            }
+          ],
+          [
+            "AWS/RDS",
+            "FreeStorageSpace",
+            "DBInstanceIdentifier",
+            "dulce-arte-db",
+            {
+              "id": "m1",
+              "visible": false
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "type": "metric",
+      "x": 16,
+      "y": 14,
+      "width": 8,
+      "height": 6,
+      "properties": {
+        "view": "timeSeries",
+        "region": "us-east-1",
+        "title": "Lambda dulce-arte-tareas",
+        "stat": "Sum",
+        "period": 3600,
+        "metrics": [
+          [
+            "AWS/Lambda",
+            "Invocations",
+            "FunctionName",
+            "dulce-arte-tareas",
+            {
+              "label": "Ejecuciones"
+            }
+          ],
+          [
+            "AWS/Lambda",
+            "Errors",
+            "FunctionName",
+            "dulce-arte-tareas",
+            {
+              "label": "Errores"
+            }
+          ]
+        ]
+      }
+    }
+  ]
+}
