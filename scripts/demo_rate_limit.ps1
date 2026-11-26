@@ -64,7 +64,7 @@ for ($i = 0; $i -lt $tareas.Count; $i++) {
     $r = $tareas[$i].Result
     $texto = $r.Content.ReadAsStringAsync().Result
     $origen = Clasificar ([int]$r.StatusCode) $texto
-    $resultados += [pscustomobject]@{ N = $i + 1; Codigo = [int]$r.StatusCode; Resultado = $origen }
+    $resultados += [pscustomobject]@{ N = $i + 1; Codigo = [int]$r.StatusCode; Resultado = $origen; Respuesta = $texto }
     Escribir ("  #{0,-3} -> {1}" -f ($i + 1), $origen)
 }
 Escribir ""
@@ -72,6 +72,12 @@ Escribir ("Tiempo total de la ráfaga: {0:N2} s" -f $reloj.Elapsed.TotalSeconds)
 Escribir "Resumen fase 1:"
 $resultados | Group-Object Resultado | Sort-Object Name | ForEach-Object {
     Escribir ("  {0,-32} {1,4}" -f $_.Name, $_.Count)
+}
+Escribir "Ejemplo de respuesta de cada tipo:"
+$resultados | Group-Object Resultado | Sort-Object Name | ForEach-Object {
+    $ejemplo = $_.Group[0].Respuesta
+    if ($ejemplo.Length -gt 110) { $ejemplo = $ejemplo.Substring(0, 110) + "..." }
+    Escribir ("  {0}: {1}" -f $_.Name, $ejemplo)
 }
 
 # ---------- FASE 2: pocas peticiones, lentas ----------
